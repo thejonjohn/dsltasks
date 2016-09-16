@@ -33,7 +33,7 @@ module DSLTasks
       lib_name = lib_name.to_s
       if lib_name.start_with?('/')
         if File.exist?(lib_name)
-          unless @__lib_stack__.include?(fname)
+          unless @__lib_stack__.include?(lib_name)
             @__lib_stack__.push(File.expand_path(lib_name))
             instance_eval(File.read(lib_name), File.expand_path(lib_name))
             @__lib_stack__.pop
