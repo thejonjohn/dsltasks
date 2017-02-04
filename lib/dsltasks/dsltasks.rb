@@ -6,6 +6,7 @@ module DSLTasks
     attr_reader :__parent_task__
     attr_reader :__lib_stack__
     attr_reader :__lib_dirs__
+    attr_reader :__root__
     def __initialize_task_mixin__(opts={})
       @__parent_task__ = opts[:parent]
       @__name__ = opts[:name]
@@ -121,7 +122,7 @@ module DSLTasks
       end
       __lib_stack__.pop
 
-      instance_eval(File.read(main), main)
+      return instance_eval(File.read(main), main)
     end
   end
 
@@ -139,7 +140,13 @@ module DSLTasks
     if File.exist?(file)
       file = File.expand_path(file)
       context = DSLTaskContext.new(file, lib_dirs)
-      context.execute(file, opts[:libs])
+      (opts[:instance_variables]||{}).each do |var, value|
+        unless var.to_s.start_with?('@')
+          var = ('@' + var.to_s)
+        end
+        context.instance_variable_set(var.to_sym, value)
+      end
+      return context.execute(file, opts[:libs])
     else
       raise "File not found: #{file}"
     end
